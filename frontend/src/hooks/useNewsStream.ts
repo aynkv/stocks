@@ -1,25 +1,29 @@
 import { useEffect, useRef } from 'react'
 import type { NewsArticle } from '../types'
 
+// Same logic as the Axios client — use the env var in prod, relative path in dev
+const API_BASE = import.meta.env.VITE_API_BASE_URL
+    ? `${import.meta.env.VITE_API_BASE_URL}/api`
+    : '/api'
+
 /**
  * useNewsStream
  * ─────────────
  * Opens an SSE connection to /api/news/{ticker}/stream.
  * Calls onNewArticles whenever the server pushes new items.
  *
- * The browser's native EventSource will automatically reconnect
- * if the connection drops — no extra logic needed here.
+ * The browser's native EventSource reconnects automatically if the
+ * connection drops — no extra logic needed here.
  *
- * Cleans up (closes the connection) when ticker changes or component unmounts.
+ * Cleans up (closes the connection) when ticker changes or on unmount.
  */
 export function useNewsStream(
-  ticker: string | null,
-  onNewArticles: (articles: NewsArticle[]) => void
+    ticker: string | null,
+    onNewArticles: (articles: NewsArticle[]) => void
 ) {
   const esRef = useRef<EventSource | null>(null)
 
   useEffect(() => {
-    // Close any previous connection
     if (esRef.current) {
       esRef.current.close()
       esRef.current = null
@@ -27,16 +31,13 @@ export function useNewsStream(
 
     if (!ticker) return
 
-    const es = new EventSource(`/api/news/${ticker}/stream`)
+    const es = new EventSource(`${API_BASE}/news/${ticker}/stream`)
     esRef.current = es
 
-    // 'news' events carry JSON arrays of new articles
     es.addEventListener('news', (e: MessageEvent) => {
       try {
         const articles: NewsArticle[] = JSON.parse(e.data)
-        if (articles.length > 0) {
-          onNewArticles(articles)
-        }
+        if (articles.length > 0) onNewArticles(articles)
       } catch {
         console.warn('Failed to parse SSE news payload', e.data)
       }
@@ -47,7 +48,6 @@ export function useNewsStream(
     })
 
     es.onerror = () => {
-      // EventSource handles reconnection automatically
       console.warn(`[SSE] Connection error for ${ticker}, will retry...`)
     }
 
@@ -55,5 +55,5 @@ export function useNewsStream(
       es.close()
       esRef.current = null
     }
-  }, [ticker]) // re-run when ticker changes
+  }, [ticker])
 }
