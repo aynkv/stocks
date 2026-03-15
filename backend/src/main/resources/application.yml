@@ -1,0 +1,71 @@
+# ── Default / shared config ──────────────────────────────────────────────────
+spring:
+  application:
+    name: stockpulse
+
+  # Active profile: override with -Dspring.profiles.active=prod
+  profiles:
+    active: dev
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+
+server:
+  port: 8080
+
+# Finnhub API key — set via environment variable FINNHUB_API_KEY
+finnhub:
+  api-key: ${FINNHUB_API_KEY:demo}
+  base-url: https://finnhub.io/api/v1
+
+# How often to poll for news (milliseconds). Default: 5 minutes
+news:
+  poll-interval-ms: 300000
+
+# CORS — allow local React dev server
+cors:
+  allowed-origins: http://localhost:5173,http://localhost:3000
+
+---
+# ── Dev profile — H2 in-memory ───────────────────────────────────────────────
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+  datasource:
+    url: jdbc:h2:mem:stockpulsedb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    show-sql: true
+
+---
+# ── Prod profile — PostgreSQL ─────────────────────────────────────────────────
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/stockpulse}
+    username: ${DATABASE_USER:stockpulse}
+    password: ${DATABASE_PASSWORD:}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: false
