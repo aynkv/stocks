@@ -21,3 +21,8 @@ export const newsApi = {
   getByTicker: (ticker: string) =>
       client.get<NewsArticle[]>(`/news/${ticker}`).then(r => r.data),
 }
+
+export const quotesApi = {
+  getHistory: (ticker: string, range: TimeRange) =>
+      client.get<PriceHistoryDTO>(`/quotes/${ticker}/history`, { params: { range } }).then(r => r.data),
+}
