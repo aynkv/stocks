@@ -31,7 +31,7 @@ H2 console available at **http://localhost:8080/h2-console** (JDBC URL: `jdbc:h2
 ### 2. Frontend
 
 ```bash
-cd frontend
+cd frontend 
 npm install
 npm run dev
 ```
