@@ -1,5 +1,5 @@
 import axios from 'axios'
-import type { NewsArticle, Stock } from '../types'
+import type { NewsArticle, PriceHistoryDTO, Stock, TimeRange } from '../types'
 
 // In dev: Vite proxy forwards /api → localhost:8080 (see vite.config.ts)
 // In prod: VITE_API_BASE_URL is set to the full Railway backend URL
